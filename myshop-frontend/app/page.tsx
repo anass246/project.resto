@@ -57,7 +57,7 @@ export default function Home() {
               </a>
             </li>
             <li>
-              <a href="menu.html" className="btn-primary">
+              <a href="/menu" className="btn-primary">
                 View Menu
               </a>
             </li>
@@ -103,7 +103,7 @@ export default function Home() {
               Contact
             </a>
             <a
-              href="menu.html"
+              href="/menu"
               className="mobile-nav-link bg-[#d4af37] text-[#800000] rounded-full px-6 py-2 mt-6 font-bold"
             >
               View Menu
@@ -126,7 +126,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
               <a
-                href="menu.html"
+                href="/menu"
                 className="btn-primary text-lg py-4 px-8 floating-animation"
               >
                 <i className="fas fa-utensils mr-2" />
@@ -485,7 +485,7 @@ export default function Home() {
               </div>
             </div>
             <div className="text-center mt-12">
-              <a href="menu.html" className="btn-primary text-lg py-4 px-8">
+              <a href="/menu" className="btn-primary text-lg py-4 px-8">
                 View Full Menu <i className="fas fa-arrow-right ml-2" />
               </a>
             </div>
@@ -1010,7 +1010,7 @@ export default function Home() {
                   </li>
                   <li>
                     <a
-                      href="menu.html"
+                      href="/menu"
                       className="text-gray-300 hover:text-white transition duration-300"
                     >
                       Menu
