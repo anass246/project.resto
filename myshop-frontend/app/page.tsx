@@ -5,7 +5,7 @@ import Specialties from './components/Specialties';
 import Booking from './components/Booking';
 import BookaTable from './components/BookaTable';
 import Comments from './components/Comments';
-import Contact from './components/ContactUs';
+import ContactUs from './components/ContactUs';
 import Footer from './components/Footer';
 
 export default function Home() {
