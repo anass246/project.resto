@@ -1,4 +1,4 @@
-export default function Booking() {
+export default function BookATable() {
   return (
     <>
       <section id="booking" className="section-padding booking-section">
