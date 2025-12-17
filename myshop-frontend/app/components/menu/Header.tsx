@@ -42,15 +42,7 @@ export default function Header() {
                         Pizza
                     </a>
                 </li>
-                <li>
-                    <a
-                        href="#sandwiches"
-                        className="nav-item hover:text-yellow-200 transition duration-300 flex items-center"
-                    >
-                        <i className="fas fa-bread-slice mr-2" />
-                        Sandwiches
-                    </a>
-                </li>
+
                 <li>
                     <a
                         href="#fresh-juices"
@@ -58,24 +50,6 @@ export default function Header() {
                     >
                         <i className="fas fa-glass-whiskey mr-2" />
                         Fresh Juices
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="#drinks"
-                        className="nav-item hover:text-yellow-200 transition duration-300 flex items-center"
-                    >
-                        <i className="fas fa-coffee mr-2" />
-                        Hot Drinks
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="#desserts"
-                        className="nav-item hover:text-yellow-200 transition duration-300 flex items-center"
-                    >
-                        <i className="fas fa-ice-cream mr-2" />
-                        Desserts
                     </a>
                 </li>
             </ul>

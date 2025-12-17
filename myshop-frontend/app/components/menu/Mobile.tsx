@@ -32,21 +32,9 @@ export default function Mobile() {
                         <i className="fas fa-pizza-slice mr-3 w-5 text-center" />
                         Pizza
                     </a>
-                    <a href="#sandwiches" className="mobile-nav-item">
-                        <i className="fas fa-bread-slice mr-3 w-5 text-center" />
-                        Sandwiches
-                    </a>
                     <a href="#fresh-juices" className="mobile-nav-item">
                         <i className="fas fa-glass-whiskey mr-3 w-5 text-center" />
                         Fresh Juices
-                    </a>
-                    <a href="#drinks" className="mobile-nav-item">
-                        <i className="fas fa-coffee mr-3 w-5 text-center" />
-                        Hot Drinks
-                    </a>
-                    <a href="#desserts" className="mobile-nav-item">
-                        <i className="fas fa-ice-cream mr-3 w-5 text-center" />
-                        Desserts
                     </a>
                 </div>
             </div>

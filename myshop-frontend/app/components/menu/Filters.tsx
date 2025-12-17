@@ -1,4 +1,8 @@
-export default function Filters() {
+"use client";
+import { useEffect } from 'react';
+export default function Filters({ activeCategory, setActiveCategory }: any) {
+    useEffect(() => {
+    }, []);
     return (
         <section className="filter-section -mt-10 mx-5">
             <div className="max-w-6xl mx-auto text-center">
@@ -6,38 +10,61 @@ export default function Filters() {
                     Filter by Category
                 </h3>
                 <div className="category-filter">
-                    <button className="filter-btn active" data-category="all">
+
+                    {/* All Items */}
+                    <button
+                        className={`filter-btn ${activeCategory === 'all' ? 'active' : ''}`}
+                        onClick={() => setActiveCategory('all')}
+                    >
                         <i className="fas fa-th-large mr-2" />
                         All Items
                     </button>
-                    <button className="filter-btn" data-category="moroccan">
+
+                    {/* Moroccan */}
+                    <button
+                        className={`filter-btn ${activeCategory === 'moroccan' ? 'active' : ''}`}
+                        onClick={() => setActiveCategory('moroccan')}
+                    >
                         <i className="fas fa-utensils mr-2" />
                         Moroccan
                     </button>
-                    <button className="filter-btn" data-category="burgers">
+
+                    {/* Burgers */}
+                    <button
+                        className={`filter-btn ${activeCategory === 'burgers' ? 'active' : ''}`}
+                        onClick={() => setActiveCategory('burgers')}
+                    >
                         <i className="fas fa-hamburger mr-2" />
                         Burgers
                     </button>
-                    <button className="filter-btn" data-category="pizza">
+
+                    {/* Pizza */}
+                    <button
+                        className={`filter-btn ${activeCategory === 'pizza' ? 'active' : ''}`}
+                        onClick={() => setActiveCategory('pizza')}
+                    >
                         <i className="fas fa-pizza-slice mr-2" />
                         Pizza
                     </button>
-                    <button className="filter-btn" data-category="sandwiches">
+
+                    {/* Sandwiches */}
+                    <button
+                        className={`filter-btn ${activeCategory === 'sandwiches' ? 'active' : ''}`}
+                        onClick={() => setActiveCategory('sandwiches')}
+                    >
                         <i className="fas fa-bread-slice mr-2" />
                         Sandwiches
                     </button>
-                    <button className="filter-btn" data-category="fresh-juices">
+
+                    {/* Fresh Juices */}
+                    <button
+                        className={`filter-btn ${activeCategory === 'fresh-juices' ? 'active' : ''}`}
+                        onClick={() => setActiveCategory('fresh-juices')}
+                    >
                         <i className="fas fa-glass-whiskey mr-2" />
                         Fresh Juices
                     </button>
-                    <button className="filter-btn" data-category="drinks">
-                        <i className="fas fa-coffee mr-2" />
-                        Hot Drinks
-                    </button>
-                    <button className="filter-btn" data-category="desserts">
-                        <i className="fas fa-ice-cream mr-2" />
-                        Desserts
-                    </button>
+
                 </div>
             </div>
         </section>
