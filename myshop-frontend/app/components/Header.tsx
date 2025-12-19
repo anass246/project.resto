@@ -58,8 +58,8 @@ export default function Header() {
             </a>
           </li>
           <li>
-            <a href="/menu" className="btn-primary">
-              View Menu
+            <a href="/login" className="btn-primary">
+              Login
             </a>
           </li>
         </ul>
@@ -104,10 +104,10 @@ export default function Header() {
             Contact
           </a>
           <a
-            href="/menu"
+            href="/login"
             className="mobile-nav-link bg-[#d4af37] text-[#800000] rounded-full px-6 py-2 mt-6 font-bold"
           >
-            View Menu
+            Login
           </a>
         </div>
       </div>

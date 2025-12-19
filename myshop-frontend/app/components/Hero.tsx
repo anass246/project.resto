@@ -16,15 +16,15 @@ export default function Hero() {
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
                         <a
-                            href="/menu"
+                            href="/login"
                             className="btn-primary text-lg py-4 px-8 floating-animation"
                         >
                             <i className="fas fa-utensils mr-2" />
-                            Explore Our Menu
+                            LOGIN
                         </a>
-                        <a href="#booking" className="btn-secondary text-lg py-4 px-8">
+                        <a href="/signup" className="btn-secondary text-lg py-4 px-8">
                             <i className="fas fa-calendar-alt mr-2" />
-                            Book a Table
+                            SIGNUP
                         </a>
                     </div>
                 </div>

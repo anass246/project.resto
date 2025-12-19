@@ -46,16 +46,6 @@ export default function Filters({ activeCategory, setActiveCategory }: any) {
                         <i className="fas fa-pizza-slice mr-2" />
                         Pizza
                     </button>
-
-                    {/* Sandwiches */}
-                    <button
-                        className={`filter-btn ${activeCategory === 'sandwiches' ? 'active' : ''}`}
-                        onClick={() => setActiveCategory('sandwiches')}
-                    >
-                        <i className="fas fa-bread-slice mr-2" />
-                        Sandwiches
-                    </button>
-
                     {/* Fresh Juices */}
                     <button
                         className={`filter-btn ${activeCategory === 'fresh-juices' ? 'active' : ''}`}

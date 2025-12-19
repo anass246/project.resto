@@ -8,7 +8,7 @@ export default function Header() {
             <ul className="hidden md:flex items-center space-x-8 text-lg">
                 <li>
                     <a
-                        href="snak.html"
+                        href="/"
                         className="nav-item hover:text-yellow-200 transition duration-300 flex items-center"
                     >
                         <i className="fas fa-home mr-2" />
