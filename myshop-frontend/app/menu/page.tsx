@@ -5,7 +5,7 @@ import Header from '../components/menu/Header';
 import Footer from '../components/menu/Footer';
 import Filters from '../components/menu/Filters';
 import Shop from '../components/menu/Shop';
-import MenuList from '../components/menu/Menu'; // Check if named Menu or MenuList
+import MenuList from '../components/menu/Menu'; // تأكد سميتو Menu ولا MenuList
 import Hero from '../components/menu/Hero';
 
 export default function MenuPage() {
@@ -65,7 +65,7 @@ export default function MenuPage() {
                 </div>
 
                 <div className="w-full">
-                    {/* Linking Shop with variables */}
+                    {/* هادشي اللي كان خاصك: ربطنا Shop مع المتغيرات */}
                     <Shop
                         cart={cart}
                         isCartOpen={isCartOpen}
@@ -81,7 +81,7 @@ export default function MenuPage() {
 
             <Footer />
 
-            {/* Floating Cart Button */}
+            {/* زر السلة العائم */}
             <button
                 onClick={() => setIsCartOpen(true)}
                 className="fixed bottom-8 right-8 z-50 bg-red-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition duration-300"
