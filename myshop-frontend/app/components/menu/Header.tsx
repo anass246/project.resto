@@ -53,23 +53,6 @@ export default function Header() {
                     </a>
                 </li>
             </ul>
-            <div className="flex items-center space-x-4">
-                <button
-                    id="cart-button"
-                    className="relative text-[#fff5e6] hover:text-yellow-200 transition duration-300 text-xl"
-                >
-                    <i className="fas fa-shopping-cart" />
-                    <span id="cart-count" className="cart-icon-badge">
-                        0
-                    </span>
-                </button>
-                <button
-                    id="mobile-menu-button"
-                    className="md:hidden text-2xl text-[#fff5e6] hover:text-yellow-200 transition duration-300"
-                >
-                    <i className="fas fa-bars" />
-                </button>
-            </div>
         </nav>
     );
 }

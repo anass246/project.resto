@@ -1,10 +1,12 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // ✅ زدنا هادي للتحويل
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 export default function LoginPage() {
+    const router = useRouter(); // ✅ تفعيل Router
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -37,7 +39,8 @@ export default function LoginPage() {
         return newErrors;
     };
 
-    const handleSubmit = (e: any) => {
+    // 👇👇 هنا فين درنا التعديل باش نربطوه مع Laravel Login 👇👇
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
@@ -49,26 +52,45 @@ export default function LoginPage() {
             return;
         }
 
-        // Simulation Mode
-        setTimeout(() => {
-            setMessage('🎉 Login successful! Welcome back! (Simulation)');
+        try {
+            // الاتصال بالباكاند الحقيقي
+            const response = await fetch('http://127.0.0.1:8000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData),
+            });
 
-            // Store dummy token
-            localStorage.setItem('auth_token', 'fake-jwt-token-123456');
-            localStorage.setItem('user', JSON.stringify({
-                name: 'Demo User',
-                email: formData.email
-            }));
+            const data = await response.json();
 
-            // Redirect
-            setTimeout(() => {
-                window.location.href = '/menu';
-            }, 1500);
+            if (response.ok) {
+                // ✅ نجح الدخول
+                setMessage('🎉 Login successful! Welcome back!');
 
-        }, 1500);
+                // تخزين التوكن والمعلومات الحقيقية
+                if (data.token) localStorage.setItem('auth_token', data.token);
+                if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+                // التوجيه للصفحة الرئيسية (أو /menu إلا بغيتي)
+                setTimeout(() => {
+                    router.push('/');
+                }, 1000);
+
+            } else {
+                // ❌ فشل الدخول (المودباس غلط أو الإيميل مكاينش)
+                setMessage('❌ ' + (data.message || 'Invalid credentials'));
+            }
+        } catch (error) {
+            console.error(error);
+            setMessage('❌ Connection error. Is Backend running?');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // Demo login for testing
+    // Demo login (خليناها للتجربة إلا بغيتي)
     const handleDemoLogin = () => {
         setFormData({
             email: 'demo@restaurant.com',

@@ -89,7 +89,7 @@ export default function Specialties() {
             </div>
           </div>
           <div className="text-center mt-12">
-            <a href="/menu" className="btn-primary text-lg py-4 px-8">
+            <a href="/login" className="btn-primary text-lg py-4 px-8">
               View Full Menu <i className="fas fa-arrow-right ml-2" />
             </a>
           </div>

@@ -1,10 +1,12 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // ✅ زدنا هادي باش نديرو Redirection نقية
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 export default function SignupPage() {
+    const router = useRouter(); // ✅ تفعيل Router
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -50,11 +52,13 @@ export default function SignupPage() {
         return newErrors;
     };
 
-    const handleSubmit = (e: any) => {
+    // 👇👇 هنا فين درنا التعديل الحقيقي 👇👇
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
 
+        // 1. التحقق من الفورم قبل ما نصيفطوه
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -62,22 +66,50 @@ export default function SignupPage() {
             return;
         }
 
-        // Simulation Mode
-        setTimeout(() => {
-            console.log('Form Submitted with Data:', formData);
+        try {
+            // 2. إرسال البيانات للباكاند الحقيقي
+            const response = await fetch('http://127.0.0.1:8000/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData),
+            });
 
-            setMessage('🎉 Account created successfully! (Simulation Mode)');
-            // Store dummy token
-            localStorage.setItem('auth_token', 'simulation_token_123');
-            localStorage.setItem('user', JSON.stringify({
-                name: formData.name,
-                email: formData.email
-            }));
+            const data = await response.json();
 
-            // Redirect after delay
-            setTimeout(() => window.location.href = '/login', 1500);
+            // 3. معالجة الجواب
+            if (response.ok) {
+                // ✅ نجح التسجيل
+                setMessage('🎉 Account created successfully! Redirecting to login...');
 
-        }, 2000);
+                // نخبيو التوكن (اختياري، حيت غيمشي يدير Login)
+                if (data.token) localStorage.setItem('auth_token', data.token);
+
+                // ✅ ديه لصفحة Login ديريكت
+                setTimeout(() => router.push('/login'), 1500);
+
+            } else {
+                // ❌ كاين شي مشكل (بحال الإيميل معاود)
+                if (data.errors) {
+                    // تحويل أخطاء Laravel (Array) لأخطاء الفورم ديالنا
+                    const backendErrors: any = {};
+                    Object.keys(data.errors).forEach((key) => {
+                        backendErrors[key] = data.errors[key][0];
+                    });
+                    setErrors(backendErrors);
+                    setMessage('❌ Please fix the errors below.');
+                } else {
+                    setMessage(`❌ ${data.message || 'Registration failed'}`);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            setMessage('❌ Server Error: Cannot connect to Backend');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
