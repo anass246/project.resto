@@ -2,8 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\BookaTable;
 
 
 Route::get('/user', function (Request $request) {
@@ -11,6 +11,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // 👇 هادو هما الروابط الجداد لي زدنا (Public Routes)
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/reservations', [ReservationController::class, 'store']);
+Route::post('/signup', [AccountController::class, 'signup']);
+Route::post('/login', [AccountController::class, 'login']);
+Route::post('/reservations', [BookaTable::class, 'store']);

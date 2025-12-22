@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
-class AuthController extends Controller
+class AccountController extends Controller
 {
-    // ✅ 1. دالة التسجيل (Register)
-    public function register(Request $request)
+    // ✅ 1. دالة التسجيل (signup)
+    public function signup(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
