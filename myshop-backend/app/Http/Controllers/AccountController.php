@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class AccountController extends Controller
 {
     // ✅ 1. دالة التسجيل (signup)
-    public function signup(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
