@@ -75,7 +75,7 @@ export default function LoginPage() {
 
                 // التوجيه للصفحة الرئيسية (أو /menu إلا بغيتي)
                 setTimeout(() => {
-                    router.push('/');
+                    router.push('/menu');
                 }, 1000);
 
             } else {

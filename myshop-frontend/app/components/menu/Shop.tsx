@@ -1,7 +1,8 @@
-//sqjqjfhg
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react'; // Zidna useState
+// NEW: Import dyal PayPal
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 interface CartItem {
     id: number | string;
@@ -18,9 +19,13 @@ interface ShopProps {
     increase: (id: number | string) => void;
     decrease: (id: number | string) => void;
     remove: (id: number | string) => void;
+    clearCart?: () => void; // Zidna hadi bach nkhwiw panier mn b3d payment (optionnelle)
 }
 
-export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrease, remove }: ShopProps) {
+export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrease, remove, clearCart }: ShopProps) {
+    // NEW: State bach n3rfo wach user wrrak 3la Checkout wla la
+    const [showPayPal, setShowPayPal] = useState(false);
+
     // Calculate total safely
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const delivery = 15.00;
@@ -32,6 +37,7 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
+            setShowPayPal(false); // Reset paypal state ila tsad cart
         }
         return () => { document.body.style.overflow = ''; };
     }, [isCartOpen]);
@@ -151,7 +157,7 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                     )}
                 </div>
 
-                {/* Footer with Summary */}
+                {/* Footer with Summary & PayPal */}
                 {cart.length > 0 && (
                     <div className="p-6 bg-gradient-to-t from-gray-50 to-white border-t space-y-4">
                         <div className="space-y-2">
@@ -170,18 +176,93 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                         </div>
 
                         <div className="space-y-3">
-                            <button className="w-full bg-gradient-to-r from-[#800000] to-[#a00000] text-white py-3 rounded-lg hover:from-[#a00000] hover:to-[#800000] font-bold transition-all duration-300 shadow-lg hover:shadow-xl">
-                                <i className="fas fa-check-circle mr-2"></i>
-                                Checkout
-                            </button>
+                            {/* NEW: Logic dyal PayPal */}
+                            {!showPayPal ? (
+                                // 1. Hada Howa Bouton Checkout L3adi
+                                <button
+                                    onClick={() => setShowPayPal(true)}
+                                    className="w-full bg-gradient-to-r from-[#800000] to-[#a00000] text-white py-3 rounded-lg hover:from-[#a00000] hover:to-[#800000] font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
+                                >
+                                    <i className="fas fa-check-circle mr-2"></i>
+                                    Checkout
+                                </button>
+                            ) : (
+                                // 2. Hna kayban PayPal mli tclicker 3la Checkout
+                                <div className="mt-2 relative z-0">
+                                    <PayPalScriptProvider options={{
+                                        "client-id": "AQsYPH7QkqPL_nzyIdGqFuSToT_Jgq7a1nPJ5L7VKXmWUgwk2Fl0WbDozUmQl3ju6Z8hqOGdQeiQbl12", // تأكد بلي الكود ديالك صحيح
+                                        currency: "USD"
+                                    } as any}>
+                                        <PayPalButtons
+                                            style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay" }}
+                                            createOrder={(data: any, actions: any) => {
+                                                return actions.order.create({
+                                                    purchase_units: [{
+                                                        amount: {
+                                                            currency_code: "USD",
+                                                            value: (total / 10).toFixed(2),
+                                                        }
+                                                    }]
+                                                });
+                                            }}
+                                            onApprove={async (data, actions) => {
+                                                if (actions.order) {
+                                                    // 👇 هنا التغيير المهم: زدنا : any باش نسكتو TypeScript
+                                                    const details: any = await actions.order.capture();
 
-                            <button
-                                onClick={() => setIsCartOpen(false)}
-                                className="w-full bg-transparent border border-[#800000] text-[#800000] py-3 rounded-lg hover:bg-[#800000]/5 font-bold transition-colors"
-                            >
-                                <i className="fas fa-arrow-left mr-2"></i>
-                                Continue Shopping
-                            </button>
+                                                    alert("Transaction completed by " + details.payer.name.given_name);
+
+                                                    try {
+                                                        // رد البال: واش 8001 ولا 8000؟ (على حسب السيرفر ديالك دابا)
+                                                        const response = await fetch('http://127.0.0.1:8001/api/orders', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                            },
+                                                            body: JSON.stringify({
+                                                                // دابا هادشي كامل غايولي صحيح ومافيهش الأحمر
+                                                                client_name: details.payer.name.given_name + " " + details.payer.name.surname,
+                                                                email: details.payer.email_address,
+                                                                total_price: total,
+                                                                items: cart,
+                                                                transaction_id: details.id
+                                                            }),
+                                                        });
+
+                                                        if (response.ok) {
+                                                            console.log("Order saved!");
+                                                        }
+
+                                                    } catch (error) {
+                                                        console.error("Error:", error);
+                                                    }
+
+                                                    if (clearCart) clearCart();
+                                                    setIsCartOpen(false);
+                                                }
+                                            }}
+                                        />
+                                    </PayPalScriptProvider>
+
+                                    {/* Bouton bach tarja3 lor */}
+                                    <button
+                                        onClick={() => setShowPayPal(false)}
+                                        className="w-full text-sm text-gray-500 underline mt-2 hover:text-[#800000]"
+                                    >
+                                        Cancel Payment
+                                    </button>
+                                </div>
+                            )}
+
+                            {!showPayPal && (
+                                <button
+                                    onClick={() => setIsCartOpen(false)}
+                                    className="w-full bg-transparent border border-[#800000] text-[#800000] py-3 rounded-lg hover:bg-[#800000]/5 font-bold transition-colors"
+                                >
+                                    <i className="fas fa-arrow-left mr-2"></i>
+                                    Continue Shopping
+                                </button>
+                            )}
                         </div>
 
                         <p className="text-xs text-gray-500 text-center mt-4">
