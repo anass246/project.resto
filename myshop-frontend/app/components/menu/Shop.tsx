@@ -213,8 +213,8 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                                                     alert("Transaction completed by " + details.payer.name.given_name);
 
                                                     try {
-                                                        // رد البال: واش 8001 ولا 8000؟ (على حسب السيرفر ديالك دابا)
-                                                        const response = await fetch('http://127.0.0.1:8001/api/orders', {
+                                                       
+                                                        const response = await fetch('http://127.0.0.1:8000/api/orders', {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json',
