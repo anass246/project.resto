@@ -213,8 +213,8 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                                                     alert("Transaction completed by " + details.payer.name.given_name);
 
                                                     try {
-                                                       
-                                                        const response = await fetch('http://127.0.0.1:8000/api/orders', {
+
+                                                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json',

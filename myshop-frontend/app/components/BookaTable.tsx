@@ -20,7 +20,7 @@ export default function BookATable() {
 
   // 3. Time Slots Data (توليد الأوقات ديناميكيا)
   const timeSlots = [
-    "12:00", "13:00", "14:00", "15:00", "16:00", 
+    "12:00", "13:00", "14:00", "15:00", "16:00",
     "18:00", "19:00", "20:00", "21:00", "22:00"
   ];
 
@@ -29,7 +29,7 @@ export default function BookATable() {
     const { id, value } = e.target;
     // كانحيدو "booking-" من id باش نلقاو السمية ف state
     const fieldName = id.replace('booking-', '').replace('requests', 'special_requests');
-    
+
     setFormData(prev => ({
       ...prev,
       [fieldName]: value
@@ -48,7 +48,7 @@ export default function BookATable() {
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/reservations', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reservations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export default function BookATable() {
                   <h3 className="text-2xl font-bold text-[#800000] mb-6">
                     Make a Reservation
                   </h3>
-                  
+
                   {/* Show Message if exists */}
                   {message.text && (
                     <div className={`p-4 mb-4 rounded text-center font-bold ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -172,32 +172,31 @@ export default function BookATable() {
                           required
                         />
                       </div>
-                      
+
                       {/* Dynamic Time Slots */}
                       <div className="form-group">
                         <label className="form-label">Time</label>
                         <div className="time-slots grid grid-cols-5 gap-2" id="time-slots">
-                           {timeSlots.map((slot) => (
-                             <button
-                               key={slot}
-                               type="button"
-                               onClick={() => handleTimeSelect(slot)}
-                               className={`p-2 rounded border text-sm transition-all ${
-                                 formData.time === slot 
-                                 ? 'bg-[#800000] text-white border-[#800000]' 
-                                 : 'bg-white text-gray-700 hover:border-[#800000]'
-                               }`}
-                             >
-                               {slot}
-                             </button>
-                           ))}
+                          {timeSlots.map((slot) => (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => handleTimeSelect(slot)}
+                              className={`p-2 rounded border text-sm transition-all ${formData.time === slot
+                                ? 'bg-[#800000] text-white border-[#800000]'
+                                : 'bg-white text-gray-700 hover:border-[#800000]'
+                                }`}
+                            >
+                              {slot}
+                            </button>
+                          ))}
                         </div>
                         {/* Hidden input to store selected time for validation */}
-                        <input 
-                            type="hidden" 
-                            id="booking-time" 
-                            value={formData.time} 
-                            required 
+                        <input
+                          type="hidden"
+                          id="booking-time"
+                          value={formData.time}
+                          required
                         />
                         {!formData.time && <p className="text-xs text-red-400 mt-1">Please select a time</p>}
                       </div>
@@ -233,7 +232,7 @@ export default function BookATable() {
                   </form>
                 </div>
               </div>
-              
+
               {/* Booking Summary (Linked to State) */}
               <div>
                 <div className="booking-summary">

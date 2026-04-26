@@ -28,7 +28,7 @@ export default function Comments() {
 
         try {
             // هنا كنصيفطو للداتابيز (تأكد أن الرابط صحيح)
-            const response = await fetch('http://127.0.0.1:8000/api/comments', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
