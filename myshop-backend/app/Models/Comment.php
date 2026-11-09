@@ -14,6 +14,7 @@ class Comment extends Model
         'name',
         'email',
         'message',
-        'rating'
+        'rating',
+        'status'
     ];
 }

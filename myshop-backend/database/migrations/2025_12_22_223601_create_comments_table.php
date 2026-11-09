@@ -17,6 +17,7 @@ Schema::create('comments', function (Blueprint $table) {
         $table->string('email')->nullable();
         $table->text('message'); // هنا فين غايكون التعليق
         $table->integer('rating')->default(5); // النجوم (اختياري)
+        $table->string('status')->default('pending');
         $table->timestamps();
     });
     }

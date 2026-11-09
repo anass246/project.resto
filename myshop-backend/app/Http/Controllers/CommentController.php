@@ -9,24 +9,22 @@ class CommentController extends Controller
 {
     public function store(Request $request)
     {
-        $comments = Comment::orderBy('created_at', 'desc')->get();
-        return response()->json($comments);
-        // 1. التحقق من المعلومات
+        // 1. Validation
         $request->validate([
-            'name' => 'required',
-            'content' => 'required', // انتبه: فالرياكت سميتها content
-            'rating' => 'required|integer'
+            'name' => 'required|string',
+            'content' => 'required|string',
+            'rating' => 'required|integer|min:1|max:5'
         ]);
 
-        // 2. التسجيل فالداتابيز
+        // 2. Save to database
         $comment = Comment::create([
             'name' => $request->name,
             'message' => $request->content,
             'rating' => $request->rating,
-            'status' => 'pending' // كيبان غير للأدمين فالأول
+            'status' => 'pending'
         ]);
 
-        return response()->json(['message' => 'Comment saved!'], 201);
+        return response()->json(['message' => 'Comment saved successfully!', 'comment' => $comment], 201);
     }
     
     // دالة باش تجيب الكومنتيرات الموافق عليها (اختياري)

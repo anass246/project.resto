@@ -1,341 +1,254 @@
 @extends('layouts.admin')
 
-@section('content')
-    <div class="container">
-        <header class="page-header">
-            <h1><i class="fas fa-calendar-check"></i> إدارة الحجوزات</h1>
-            <p class="subtitle">عرض وإدارة جميع حجوزات العملاء</p>
-        </header>
+@section('title', 'Reservations Management')
+@section('breadcrumb', 'Reservations')
 
-        <div class="dashboard-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-            <div class="card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #800000;">
-                <div class="card-title" style="color: #666; font-size: 14px; margin-bottom: 10px;">إجمالي الحجوزات</div>
-                <div class="card-value" style="font-size: 32px; font-weight: bold; color: #800000;">{{ isset($reservations) ? count($reservations) : 0 }}</div>
+@section('content')
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-calendar-check"></i> Reservations Management</h1>
+            <p class="subtitle">Review, confirm, and manage customer table bookings.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button id="export-btn" class="btn btn-primary">
+                <i class="fas fa-file-export"></i> Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="dashboard-cards">
+        <div class="stat-card">
+            <div class="stat-card-top">
+                <div class="stat-icon primary">
+                    <i class="fas fa-calendar-days"></i>
+                </div>
+                <span class="stat-badge primary">Total</span>
             </div>
-            
-            <div class="card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #4CAF50;">
-                <div class="card-title" style="color: #666; font-size: 14px; margin-bottom: 10px;">الحجوزات المؤكدة</div>
-                <div class="card-value" style="font-size: 32px; font-weight: bold; color: #4CAF50;">
+            <div>
+                <div class="stat-label">Total Reservations</div>
+                <div class="stat-value">{{ isset($reservations) ? count($reservations) : 0 }}</div>
+            </div>
+            <div class="stat-card-footer">
+                <i class="fas fa-database"></i>
+                <span>All time recorded bookings</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-top">
+                <div class="stat-icon success">
+                    <i class="fas fa-circle-check"></i>
+                </div>
+                <span class="stat-badge success">Active</span>
+            </div>
+            <div>
+                <div class="stat-label">Confirmed Bookings</div>
+                <div class="stat-value" style="color: var(--success);">
                     {{ isset($reservations) ? $reservations->where('status', 'confirmed')->count() : 0 }}
                 </div>
             </div>
-            
-            <div class="card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #FF9800;">
-                <div class="card-title" style="color: #666; font-size: 14px; margin-bottom: 10px;">الحجوزات القادمة اليوم</div>
-                <div class="card-value" style="font-size: 32px; font-weight: bold; color: #FF9800;">
+            <div class="stat-card-footer">
+                <i class="fas fa-check-double"></i>
+                <span>Ready for dining</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-top">
+                <div class="stat-icon accent">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <span class="stat-badge success">Today</span>
+            </div>
+            <div>
+                <div class="stat-label">Today's Schedule</div>
+                <div class="stat-value" style="color: var(--warning);">
                     {{ isset($reservations) ? $reservations->where('date', today()->format('Y-m-d'))->count() : 0 }}
                 </div>
             </div>
+            <div class="stat-card-footer">
+                <i class="far fa-clock"></i>
+                <span>Tables booked for today</span>
+            </div>
         </div>
+    </div>
 
-        <div class="filters-section" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div class="filter-group">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">التاريخ</label>
-                        <input type="date" id="filter-date" style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">الحالة</label>
-                        <select id="filter-status" style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; min-width: 150px;">
-                            <option value="all">جميع الحالات</option>
-                            <option value="confirmed">مؤكدة</option>
-                            <option value="pending">قيد الانتظار</option>
-                            <option value="cancelled">ملغية</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <button id="export-btn" style="background: #800000; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-download"></i> تصدير البيانات
-                    </button>
-                </div>
+    <!-- Main Table Container -->
+    <div class="card-box">
+        <!-- Filters Bar -->
+        <div class="filters-bar">
+            <div class="filters-group">
+                <input type="text" id="resSearchInput" class="input-control" placeholder="Search customer, phone..." style="min-width: 240px;">
+                <input type="date" id="filter-date" class="input-control">
+                <select id="filter-status" class="select-control">
+                    <option value="all">All Statuses</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted); font-weight: 500;">
+                Showing <strong>{{ isset($reservations) ? count($reservations) : 0 }}</strong> table bookings
             </div>
         </div>
 
-        <div class="table-container" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.08);">
-            <div class="table-responsive" style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead style="background: linear-gradient(135deg, #800000, #a00000); color: white;">
+        <div class="table-responsive">
+            <table class="custom-table" id="reservationsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">ID</th>
+                        <th>Customer</th>
+                        <th>Phone & Notes</th>
+                        <th>Booking Date</th>
+                        <th>Time</th>
+                        <th>Guests</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(isset($reservations) && count($reservations) > 0)
+                        @foreach($reservations as $reservation)
                         <tr>
-                            <th style="padding: 18px 15px; text-align: right; font-weight: 600;">#</th>
-                            <th style="padding: 18px 15px; text-align: right; font-weight: 600;">العميل</th>
-                            <th style="padding: 18px 15px; text-align: right; font-weight: 600;">التواصل</th>
-                            <th style="padding: 18px 15px; text-align: right; font-weight: 600;">التاريخ والوقت</th>
-                            <th style="padding: 18px 15px; text-align: right; font-weight: 600;">عدد الضيوف</th>
-                            <th style="padding: 18px 15px; text-align: right; font-weight: 600;">الحالة</th>
-                            <th style="padding: 18px 15px; text-align: right; font-weight: 600;">الإجراءات</th>
+                            <td>
+                                <span class="id-badge">#{{ $reservation->id }}</span>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">
+                                        {{ strtoupper(substr($reservation->name, 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <div class="user-name">{{ $reservation->name }}</div>
+                                        <div class="user-subtext">{{ $reservation->email ?? 'No email' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--dark-muted);">
+                                    <i class="fas fa-phone" style="color: var(--primary); font-size: 12px;"></i>
+                                    {{ $reservation->phone }}
+                                </div>
+                                @if(!empty($reservation->special_requests))
+                                    <div class="user-subtext" style="margin-top: 4px; max-width: 240px; color: #b45309;">
+                                        <i class="fas fa-comment-dots"></i> {{ Str::limit($reservation->special_requests, 35) }}
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; color: var(--dark);">
+                                    {{ \Carbon\Carbon::parse($reservation->date)->format('M d, Y') }}
+                                </div>
+                                <div class="user-subtext">
+                                    {{ \Carbon\Carbon::parse($reservation->date)->format('l') }}
+                                </div>
+                            </td>
+                            <td>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-size: 13px; background: var(--bg-body); padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                                    <i class="far fa-clock" style="color: var(--primary);"></i>
+                                    {{ $reservation->time }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #e0f2fe; color: #0284c7; font-weight: 700; font-size: 14px;">
+                                    {{ $reservation->guests }}
+                                </span>
+                            </td>
+                            <td>
+                                @if($reservation->status == 'confirmed')
+                                    <span class="badge badge-success"><span class="badge-dot"></span> Confirmed</span>
+                                @elseif($reservation->status == 'cancelled')
+                                    <span class="badge badge-danger"><span class="badge-dot"></span> Cancelled</span>
+                                @else
+                                    <span class="badge badge-warning"><span class="badge-dot"></span> Pending</span>
+                                @endif
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; gap: 6px;">
+                                    <button class="action-btn view view-btn" title="View details" data-id="{{ $reservation->id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn edit edit-btn" title="Edit booking" data-id="{{ $reservation->id }}">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </button>
+                                    <button class="action-btn delete delete-btn" title="Delete booking" data-id="{{ $reservation->id }}">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @if(isset($reservations) && count($reservations) > 0)
-                            @foreach($reservations as $reservation)
-                            <tr style="border-bottom: 1px solid #f0f0f0; transition: background-color 0.2s;" 
-                                onmouseover="this.style.backgroundColor='#f9f9f9'" 
-                                onmouseout="this.style.backgroundColor='white'">
-                                <td style="padding: 18px 15px; font-weight: bold; color: #800000;">#{{ $reservation->id }}</td>
-                                <td style="padding: 18px 15px;">
-                                    <div style="font-weight: 600; color: #333;">{{ $reservation->name }}</div>
-                                    @if(isset($reservation->email))
-                                    <div style="font-size: 13px; color: #666; margin-top: 3px;">{{ $reservation->email }}</div>
-                                    @endif
-                                </td>
-                                <td style="padding: 18px 15px;">
-                                    <div style="display: flex; align-items: center; gap: 8px; color: #333;">
-                                        <i class="fas fa-phone" style="color: #800000;"></i>
-                                        {{ $reservation->phone }}
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">
+                                        <i class="far fa-calendar-xmark"></i>
                                     </div>
-                                    @if(isset($reservation->notes))
-                                    <div style="font-size: 12px; color: #888; margin-top: 5px; max-width: 200px;">
-                                        <i class="fas fa-sticky-note"></i> {{ Str::limit($reservation->notes, 30) }}
-                                    </div>
-                                    @endif
-                                </td>
-                                <td style="padding: 18px 15px;">
-                                    <div style="font-weight: 600; color: #333;">{{ \Carbon\Carbon::parse($reservation->date)->format('d/m/Y') }}</div>
-                                    <div style="font-size: 14px; color: #666; margin-top: 5px;">
-                                        <i class="far fa-clock" style="margin-left: 5px;"></i> {{ $reservation->time }}
-                                    </div>
-                                </td>
-                                <td style="padding: 18px 15px;">
-                                    <div style="display: inline-flex; align-items: center; justify-content: center; background: #f0f7ff; color: #0066cc; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 16px;">
-                                        {{ $reservation->guests }}
-                                    </div>
-                                </td>
-                                <td style="padding: 18px 15px;">
-                                    @php
-                                        $statusColor = 'green';
-                                        $statusBg = '#e7f7ef';
-                                        $statusText = 'مؤكدة';
-                                        
-                                        if(isset($reservation->status)) {
-                                            if($reservation->status == 'pending') {
-                                                $statusColor = '#FF9800';
-                                                $statusBg = '#fff8e1';
-                                                $statusText = 'قيد الانتظار';
-                                            } elseif($reservation->status == 'cancelled') {
-                                                $statusColor = '#f44336';
-                                                $statusBg = '#ffebee';
-                                                $statusText = 'ملغية';
-                                            } elseif($reservation->status == 'completed') {
-                                                $statusColor = '#9c27b0';
-                                                $statusBg = '#f3e5f5';
-                                                $statusText = 'مكتملة';
-                                            }
-                                        }
-                                    @endphp
-                                    <span style="display: inline-flex; align-items: center; padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 13px; background-color: {{ $statusBg }}; color: {{ $statusColor }};">
-                                        @if($reservation->status == 'confirmed')
-                                        <i class="fas fa-check-circle" style="margin-left: 5px;"></i>
-                                        @elseif($reservation->status == 'pending')
-                                        <i class="fas fa-clock" style="margin-left: 5px;"></i>
-                                        @elseif($reservation->status == 'cancelled')
-                                        <i class="fas fa-times-circle" style="margin-left: 5px;"></i>
-                                        @endif
-                                        {{ $statusText }}
-                                    </span>
-                                </td>
-                                <td style="padding: 18px 15px;">
-                                    <div style="display: flex; gap: 10px;">
-                                        <button class="action-btn view-btn" style="background: #2196F3; color: white; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="عرض التفاصيل">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="action-btn edit-btn" style="background: #FF9800; color: white; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="تعديل">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="action-btn delete-btn" style="background: #f44336; color: white; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="حذف">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        @else
-                            <tr>
-                                <td colspan="7" style="padding: 50px 20px; text-align: center; color: #888;">
-                                    <div style="font-size: 72px; color: #e0e0e0; margin-bottom: 20px;">
-                                        <i class="far fa-calendar-times"></i>
-                                    </div>
-                                    <h3 style="color: #666; margin-bottom: 10px;">لا توجد حجوزات حتى الآن</h3>
-                                    <p style="color: #999; max-width: 500px; margin: 0 auto;">لم يتم العثور على أي حجوزات في النظام. ستظهر هنا عند توفر حجوزات جديدة.</p>
-                                </td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
-            </div>
-            
-            @if(isset($reservations) && count($reservations) > 0)
-            <div class="table-footer" style="padding: 20px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div style="color: #666; font-size: 14px;">
-                    عرض <strong>{{ count($reservations) }}</strong> من إجمالي الحجوزات
-                </div>
-                
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="pagination-btn" style="background: #f5f5f5; border: 1px solid #ddd; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <span style="padding: 0 10px; color: #333; font-weight: 600;">1</span>
-                    <button class="pagination-btn" style="background: #f5f5f5; border: 1px solid #ddd; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                </div>
-            </div>
-            @endif
+                                    <h3>No Table Reservations Yet</h3>
+                                    <p>When customers reserve a table from the website, their details and requested dates will show up here.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
         </div>
-        
+
         @if(isset($reservations) && count($reservations) > 0)
-        <div class="summary-section" style="margin-top: 30px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <h3 style="color: #800000; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">ملخص الحجوزات</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                <div style="padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                    <div style="font-weight: 600; color: #333; margin-bottom: 10px;">الحجوزات القادمة</div>
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div style="font-size: 24px; font-weight: bold; color: #800000;">
-                            {{ $reservations->where('date', '>=', today()->format('Y-m-d'))->count() }}
-                        </div>
-                        <i class="fas fa-calendar-alt" style="font-size: 24px; color: #800000;"></i>
-                    </div>
-                </div>
-                
-                <div style="padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                    <div style="font-weight: 600; color: #333; margin-bottom: 10px;">متوسط عدد الضيوف</div>
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">
-                            {{ round($reservations->avg('guests') ?? 0, 1) }}
-                        </div>
-                        <i class="fas fa-users" style="font-size: 24px; color: #4CAF50;"></i>
-                    </div>
-                </div>
-                
-                <div style="padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                    <div style="font-weight: 600; color: #333; margin-bottom: 10px;">الحجوزات خلال هذا الشهر</div>
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div style="font-size: 24px; font-weight: bold; color: #2196F3;">
-                            {{ $reservations->where('date', '>=', now()->startOfMonth()->format('Y-m-d'))->count() }}
-                        </div>
-                        <i class="fas fa-chart-line" style="font-size: 24px; color: #2196F3;"></i>
-                    </div>
-                </div>
+        <div class="table-footer">
+            <div>
+                Showing <strong>{{ count($reservations) }}</strong> total reservations
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline btn-sm" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                <button class="btn btn-outline btn-sm" disabled>Next <i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
         @endif
     </div>
 
-    <style>
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 25px;
-        }
-        
-        .page-header {
-            margin-bottom: 35px;
-        }
-        
-        .page-header h1 {
-            color: #800000;
-            font-size: 32px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .page-header .subtitle {
-            color: #666;
-            font-size: 16px;
-        }
-        
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.2s;
-        }
-        
-        .pagination-btn:hover {
-            background-color: #e0e0e0 !important;
-            transition: background-color 0.2s;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .dashboard-cards {
-                grid-template-columns: 1fr !important;
-            }
-            
-            .filters-section > div {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-            
-            .table-footer {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-            
-            th, td {
-                padding: 12px 10px !important;
-                font-size: 14px;
-            }
-        }
-    </style>
-    
+    <!-- Quick Javascript for interactive table features -->
     <script>
-        // JavaScript للتفاعل مع الحجوزات
         document.addEventListener('DOMContentLoaded', function() {
-            // فلترة حسب التاريخ
-            const dateFilter = document.getElementById('filter-date');
-            if(dateFilter) {
-                dateFilter.addEventListener('change', function() {
-                    // كود الفلترة حسب التاريخ
-                    console.log('Filter by date:', this.value);
+            // Search filter
+            const searchInput = document.getElementById('resSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const query = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#reservationsTable tbody tr');
+                    rows.forEach(row => {
+                        row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+                    });
                 });
             }
-            
-            // فلترة حسب الحالة
-            const statusFilter = document.getElementById('filter-status');
-            if(statusFilter) {
-                statusFilter.addEventListener('change', function() {
-                    // كود الفلترة حسب الحالة
-                    console.log('Filter by status:', this.value);
-                });
-            }
-            
-            // تصدير البيانات
+
+            // Export button demo
             const exportBtn = document.getElementById('export-btn');
             if(exportBtn) {
-                exportBtn.addEventListener('click', function() {
-                    // كود تصدير البيانات
-                    alert('سيتم تصدير البيانات قريبًا...');
+                exportBtn.addEventListener('click', () => {
+                    alert('Exporting reservations table to CSV/Excel...');
                 });
             }
-            
-            // أزرار الإجراءات
+
+            // Action Buttons
             document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const reservationId = this.closest('tr').querySelector('td:first-child').textContent.replace('#', '');
-                    alert('عرض تفاصيل الحجز رقم: ' + reservationId);
+                    alert('Viewing reservation #' + this.dataset.id);
                 });
             });
-            
+
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const reservationId = this.closest('tr').querySelector('td:first-child').textContent.replace('#', '');
-                    alert('تعديل الحجز رقم: ' + reservationId);
+                    alert('Edit reservation #' + this.dataset.id);
                 });
             });
-            
+
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const reservationId = this.closest('tr').querySelector('td:first-child').textContent.replace('#', '');
-                    if(confirm('هل أنت متأكد من حذف الحجز رقم ' + reservationId + '؟')) {
-                        alert('سيتم حذف الحجز رقم: ' + reservationId);
+                    if (confirm('Are you sure you want to delete reservation #' + this.dataset.id + '?')) {
+                        alert('Reservation #' + this.dataset.id + ' deleted.');
                     }
                 });
             });

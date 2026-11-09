@@ -3,25 +3,35 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// 👇 هادو هما السطور اللي ناقصينك!
 use App\Models\Order;       
 use App\Models\Reservation; 
+use App\Models\Comment;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. حسب عدد الطلبات (دابا غايعرف منين يجيب Order)
+        // 1. Orders count & total revenue
         $ordersCount = Order::count();
-        
-        // 2. حسب مجموع الفلوس
-        $totalRevenue = Order::sum('total_price');
+        $totalRevenue = Order::sum('total_price') ?? 0;
 
-        // 3. حسب عدد الحجوزات (تأكد أنك ديجا مصاوب الموديل Reservation)
-        // إلى مازال ما عندكش الموديل Reservation، دير قدام السطر جوج شرطات // باش يتلغى مؤقتاً
-        // $reservationsCount = Reservation::count(); 
-        $reservationsCount = 0; // دير هادي مؤقتاً باش مايطلعش ليك خطأ آخر
+        // 2. Reservations count
+        $reservationsCount = Reservation::count();
 
-        return view('admin.dashboard', compact('ordersCount', 'totalRevenue', 'reservationsCount'));
+        // 3. Customer comments & reviews count
+        $commentsCount = Comment::count();
+
+        // 4. Recent activity
+        $recentOrders = Order::latest()->take(5)->get();
+        $recentReservations = Reservation::latest()->take(5)->get();
+
+        return view('admin.dashboard', compact(
+            'ordersCount', 
+            'totalRevenue', 
+            'reservationsCount', 
+            'commentsCount',
+            'recentOrders',
+            'recentReservations'
+        ));
     }
 }
