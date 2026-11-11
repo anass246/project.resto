@@ -28,7 +28,7 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
 
     // Calculate total safely
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const delivery = 15.00;
+    const delivery = 3.00;
     const total = subtotal + delivery;
 
     // Control body overflow
@@ -84,7 +84,8 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                             </div>
                             <p className="text-lg mb-2">Your cart is empty</p>
                             <p className="text-sm text-gray-500 text-center max-w-xs">
-                                Add some items from our delicious menu
+                                Add some items from 
+                                
                             </p>
                             <button
                                 onClick={() => setIsCartOpen(false)}
@@ -117,7 +118,7 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h3 className="font-bold text-[#800000]">{item.name}</h3>
-                                                <p className="text-gray-600 text-sm mt-1">Price: {item.price.toFixed(2)} DH</p>
+                                                <p className="text-gray-600 text-sm mt-1">Price: ${item.price.toFixed(2)}</p>
                                             </div>
                                             <button
                                                 onClick={() => remove(item.id)}
@@ -129,7 +130,7 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
 
                                         <div className="mt-4">
                                             <p className="text-gray-800 font-bold mb-2">
-                                                Total: <span className="text-[#800000]">{(item.price * item.quantity).toFixed(2)} DH</span>
+                                                Total: <span className="text-[#800000]">${(item.price * item.quantity).toFixed(2)}</span>
                                             </p>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-600 text-sm">Qty:</span>
@@ -163,22 +164,21 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                         <div className="space-y-2">
                             <div className="flex justify-between text-gray-700">
                                 <span>Subtotal:</span>
-                                <span className="font-bold">{subtotal.toFixed(2)} DH</span>
+                                <span className="font-bold">${subtotal.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-gray-700">
                                 <span>Delivery Fee:</span>
-                                <span className="font-bold">{delivery.toFixed(2)} DH</span>
+                                <span className="font-bold">${delivery.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-lg font-bold border-t pt-3 mt-2 text-[#800000]">
                                 <span>Total Amount:</span>
-                                <span>{total.toFixed(2)} DH</span>
+                                <span>${total.toFixed(2)}</span>
                             </div>
                         </div>
 
                         <div className="space-y-3">
-                            {/* NEW: Logic dyal PayPal */}
+                            {/* PayPal Checkout */}
                             {!showPayPal ? (
-                                // 1. Hada Howa Bouton Checkout L3adi
                                 <button
                                     onClick={() => setShowPayPal(true)}
                                     className="w-full bg-gradient-to-r from-[#800000] to-[#a00000] text-white py-3 rounded-lg hover:from-[#a00000] hover:to-[#800000] font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -187,10 +187,9 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                                     Checkout
                                 </button>
                             ) : (
-                                // 2. Hna kayban PayPal mli tclicker 3la Checkout
                                 <div className="mt-2 relative z-0">
                                     <PayPalScriptProvider options={{
-                                        "client-id": "AQsYPH7QkqPL_nzyIdGqFuSToT_Jgq7a1nPJ5L7VKXmWUgwk2Fl0WbDozUmQl3ju6Z8hqOGdQeiQbl12", // تأكد بلي الكود ديالك صحيح
+                                        "client-id": "AQsYPH7QkqPL_nzyIdGqFuSToT_Jgq7a1nPJ5L7VKXmWUgwk2Fl0WbDozUmQl3ju6Z8hqOGdQeiQbl12",
                                         currency: "USD"
                                     } as any}>
                                         <PayPalButtons
@@ -200,27 +199,24 @@ export default function Shop({ cart, isCartOpen, setIsCartOpen, increase, decrea
                                                     purchase_units: [{
                                                         amount: {
                                                             currency_code: "USD",
-                                                            value: (total / 10).toFixed(2),
+                                                            value: total.toFixed(2),
                                                         }
                                                     }]
                                                 });
                                             }}
                                             onApprove={async (data, actions) => {
                                                 if (actions.order) {
-                                                    // 👇 هنا التغيير المهم: زدنا : any باش نسكتو TypeScript
                                                     const details: any = await actions.order.capture();
 
                                                     alert("Transaction completed by " + details.payer.name.given_name);
 
                                                     try {
-
                                                         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json',
                                                             },
                                                             body: JSON.stringify({
-                                                                // دابا هادشي كامل غايولي صحيح ومافيهش الأحمر
                                                                 client_name: details.payer.name.given_name + " " + details.payer.name.surname,
                                                                 email: details.payer.email_address,
                                                                 total_price: total,

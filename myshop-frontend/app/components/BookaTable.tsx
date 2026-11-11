@@ -18,7 +18,7 @@ export default function BookATable() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [bookingStatus, setBookingStatus] = useState('Pending');
 
-  // 3. Time Slots Data (توليد الأوقات ديناميكيا)
+  // 3. Time Slots Data
   const timeSlots = [
     "12:00", "13:00", "14:00", "15:00", "16:00",
     "18:00", "19:00", "20:00", "21:00", "22:00"
@@ -27,7 +27,6 @@ export default function BookATable() {
   // 4. Handle Input Change
   const handleChange = (e: any) => {
     const { id, value } = e.target;
-    // كانحيدو "booking-" من id باش نلقاو السمية ف state
     const fieldName = id.replace('booking-', '').replace('requests', 'special_requests');
 
     setFormData(prev => ({
@@ -68,7 +67,7 @@ export default function BookATable() {
       } else {
         // ❌ Error
         setMessage({ type: 'error', text: '❌ Failed to book. Please check fields.' });
-        console.log(data); // دير log عادية باش ماتحبسش ليك ليكران
+        console.log(data);
       }
     } catch (error) {
       setMessage({ type: 'error', text: '❌ Server connection error' });

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
-    // ✅ 1. دالة التسجيل (signup)
+    // 1. Signup method
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -27,6 +27,7 @@ class AccountController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'customer',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -38,10 +39,10 @@ class AccountController extends Controller
         ], 201);
     }
 
-    // ✅ 2. دالة الدخول (Login) - هادي اللي زدنا دابا
+    // 2. Login method
     public function login(Request $request)
     {
-        // التحقق من المعلومات
+        // Validation
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
@@ -51,27 +52,27 @@ class AccountController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // قلب على اليوزر بالإيميل
+        // Search user by email
         $user = User::where('email', $request->email)->first();
 
-// 1. تحقق واش اليوزر كاين أصلاً
+        // 1. Check if user exists
         if (!$user) {
             return response()->json([
-                'message' => 'Hada l-email ma msajalch. 3afak sir tsajal ba3da.'
+                'message' => 'This email is not registered. Please create an account first.'
             ], 404);
         }
 
-        // 2. دابا عاد تحقق من المود باس
+        // 2. Verify password
         if (!Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Invalid login credentials (Mot de passe ghalat)'
+                'message' => 'Invalid email or password. Please try again.'
             ], 401);
         }
 
-        // صايب التوكن
+        // Create Auth Token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // صيفط الجواب
+        // Return JSON response
         return response()->json([
             'message' => 'Login successful',
             'user' => $user,

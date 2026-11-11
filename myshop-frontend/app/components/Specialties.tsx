@@ -1,4 +1,24 @@
+"use client";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function Specialties() {
+  const router = useRouter();
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const user = localStorage.getItem('user');
+      if (!token || !user) {
+        e.preventDefault();
+        router.push('/login?redirect=/menu&reason=auth_required');
+      }
+    } catch {
+      e.preventDefault();
+      router.push('/login?redirect=/menu&reason=auth_required');
+    }
+  };
+
   return (
     <>
       <section className="section-padding bg-[#fffaf0]">
@@ -23,7 +43,7 @@ export default function Specialties() {
                   Juicy beef patties with fresh vegetables and special sauce
                 </p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-[#800000]">45 MAD</span>
+                  <span className="text-lg font-bold text-[#800000]">$11.99</span>
                   <button className="text-[#d4af37] hover:text-[#800000] transition duration-300">
                     <i className="fas fa-plus-circle text-xl" />
                   </button>
@@ -42,7 +62,7 @@ export default function Specialties() {
                   Thin crust pizza with premium toppings and melted cheese
                 </p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-[#800000]">65 MAD</span>
+                  <span className="text-lg font-bold text-[#800000]">$14.99</span>
                   <button className="text-[#d4af37] hover:text-[#800000] transition duration-300">
                     <i className="fas fa-plus-circle text-xl" />
                   </button>
@@ -61,7 +81,7 @@ export default function Specialties() {
                   Slow-cooked traditional dish with tender meat and vegetables
                 </p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-[#800000]">75 MAD</span>
+                  <span className="text-lg font-bold text-[#800000]">$16.99</span>
                   <button className="text-[#d4af37] hover:text-[#800000] transition duration-300">
                     <i className="fas fa-plus-circle text-xl" />
                   </button>
@@ -80,7 +100,7 @@ export default function Specialties() {
                   Natural fruit juices made from seasonal fresh fruits
                 </p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-[#800000]">20 MAD</span>
+                  <span className="text-lg font-bold text-[#800000]">$5.99</span>
                   <button className="text-[#d4af37] hover:text-[#800000] transition duration-300">
                     <i className="fas fa-plus-circle text-xl" />
                   </button>
@@ -89,9 +109,14 @@ export default function Specialties() {
             </div>
           </div>
           <div className="text-center mt-12">
-            <a href="/login" className="btn-primary text-lg py-4 px-8">
-              View Full Menu <i className="fas fa-arrow-right ml-2" />
-            </a>
+            <Link
+              href="/menu"
+              onClick={handleMenuClick}
+              className="btn-primary text-lg py-4 px-8 inline-flex items-center justify-center gap-2"
+            >
+              <span>View Full Menu</span>
+              <i className="fas fa-arrow-right" />
+            </Link>
           </div>
         </div>
       </section>

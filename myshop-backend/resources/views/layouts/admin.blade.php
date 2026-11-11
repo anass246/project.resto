@@ -75,10 +75,16 @@
                     <i class="fas fa-user-shield"></i>
                 </div>
                 <div class="profile-details">
-                    <div class="profile-name">Restaurant Manager</div>
-                    <div class="profile-status">System Online</div>
+                    <div class="profile-name">{{ session('admin_user', auth()->user()?->name ?? 'Hamza (Admin)') }}</div>
+                    <div class="profile-status">Authorized Admin</div>
                 </div>
             </div>
+
+            <!-- Sign Out Button -->
+            <a href="/admin/logout" style="margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; color: #fca5a5; text-decoration: none; font-size: 12px; font-weight: 700; transition: all 0.25s;" onmouseover="this.style.background='rgba(239,68,68,0.3)'; this.style.color='#ffffff'" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.color='#fca5a5'">
+                <i class="fas fa-right-from-bracket"></i>
+                <span>Sign Out</span>
+            </a>
         </div>
     </aside>
 
@@ -106,11 +112,29 @@
                     <i class="fas fa-globe"></i>
                     <span>Live Store</span>
                 </a>
+                <a href="/admin/logout" title="Logout and lock admin" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 10px; text-decoration: none; font-size: 12px; font-weight: 700; transition: all 0.2s;">
+                    <i class="fas fa-lock"></i>
+                    <span>Logout</span>
+                </a>
             </div>
         </header>
 
         <!-- Main Page Content -->
         <main class="main-content">
+            @if(session('success'))
+                <div style="margin-bottom: 24px; padding: 14px 20px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; color: #065f46; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600;">
+                    <i class="fas fa-circle-check" style="color: #10b981;"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div style="margin-bottom: 24px; padding: 14px 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; color: #991b1b; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600;">
+                    <i class="fas fa-triangle-exclamation" style="color: #ef4444;"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
             @yield('content')
         </main>
     </div>

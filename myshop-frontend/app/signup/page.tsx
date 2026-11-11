@@ -1,12 +1,12 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // ✅ زدنا هادي باش نديرو Redirection نقية
+import { useRouter } from 'next/navigation';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 export default function SignupPage() {
-    const router = useRouter(); // ✅ تفعيل Router
+    const router = useRouter();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -18,6 +18,17 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [errors, setErrors] = useState<any>({});
+    const [redirectUrl, setRedirectUrl] = useState<string>('/menu');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get('redirect');
+            if (redirect) {
+                setRedirectUrl(redirect);
+            }
+        }
+    }, []);
 
     const handleChange = (e: any) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,13 +63,12 @@ export default function SignupPage() {
         return newErrors;
     };
 
-    // 👇👇 هنا فين درنا التعديل الحقيقي 👇👇
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
 
-        // 1. التحقق من الفورم قبل ما نصيفطوه
+        // 1. Client-side Validation
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -67,7 +77,7 @@ export default function SignupPage() {
         }
 
         try {
-            // 2. إرسال البيانات للباكاند الحقيقي
+            // 2. Send request to backend
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
                 method: 'POST',
                 headers: {
@@ -79,21 +89,17 @@ export default function SignupPage() {
 
             const data = await response.json();
 
-            // 3. معالجة الجواب
+            // 3. Handle response
             if (response.ok) {
-                // ✅ نجح التسجيل
-                setMessage('🎉 Account created successfully! Redirecting to login...');
+                setMessage('🎉 Account created successfully! Taking you to the menu...');
 
-                // نخبيو التوكن (اختياري، حيت غيمشي يدير Login)
                 if (data.token) localStorage.setItem('auth_token', data.token);
+                if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
 
-                // ✅ ديه لصفحة Login ديريكت
-                setTimeout(() => router.push('/login'), 1500);
+                setTimeout(() => router.push(redirectUrl || '/menu'), 1200);
 
             } else {
-                // ❌ كاين شي مشكل (بحال الإيميل معاود)
                 if (data.errors) {
-                    // تحويل أخطاء Laravel (Array) لأخطاء الفورم ديالنا
                     const backendErrors: any = {};
                     Object.keys(data.errors).forEach((key) => {
                         backendErrors[key] = data.errors[key][0];

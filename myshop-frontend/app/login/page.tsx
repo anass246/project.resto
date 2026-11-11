@@ -1,12 +1,13 @@
 "use client";
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // ✅ زدنا هادي للتحويل
+import { useRouter } from 'next/navigation';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 export default function LoginPage() {
-    const router = useRouter(); // ✅ تفعيل Router
+    const router = useRouter();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -15,6 +16,23 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [errors, setErrors] = useState<any>({});
+    const [authRequiredNotice, setAuthRequiredNotice] = useState<string | null>(null);
+    const [redirectUrl, setRedirectUrl] = useState<string>('/menu');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get('redirect');
+            const reason = params.get('reason');
+
+            if (redirect) {
+                setRedirectUrl(redirect);
+            }
+            if (reason === 'auth_required' || redirect === '/menu') {
+                setAuthRequiredNotice('Please sign in or create an account to view our menu and order online.');
+            }
+        }
+    }, []);
 
     const handleChange = (e: any) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,7 +57,6 @@ export default function LoginPage() {
         return newErrors;
     };
 
-    // 👇👇 هنا فين درنا التعديل باش نربطوه مع Laravel Login 👇👇
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         setLoading(true);
@@ -52,8 +69,17 @@ export default function LoginPage() {
             return;
         }
 
+        // Check if Admin email entered on customer portal
+        if (formData.email.toLowerCase().includes('admin')) {
+            setMessage('🛡️ Administrator detected. Redirecting to secure Admin Portal...');
+            setTimeout(() => {
+                window.location.href = 'http://127.0.0.1:8000/admin/login';
+            }, 800);
+            setLoading(false);
+            return;
+        }
+
         try {
-            // الاتصال بالباكاند الحقيقي
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
                 headers: {
@@ -66,20 +92,15 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (response.ok) {
-                // ✅ نجح الدخول
                 setMessage('🎉 Login successful! Welcome back!');
 
-                // تخزين التوكن والمعلومات الحقيقية
                 if (data.token) localStorage.setItem('auth_token', data.token);
                 if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
 
-                // التوجيه للصفحة الرئيسية (أو /menu إلا بغيتي)
                 setTimeout(() => {
-                    router.push('/menu');
+                    router.push(redirectUrl || '/menu');
                 }, 1000);
-
             } else {
-                // ❌ فشل الدخول (المودباس غلط أو الإيميل مكاينش)
                 setMessage('❌ ' + (data.message || 'Invalid credentials'));
             }
         } catch (error) {
@@ -90,67 +111,96 @@ export default function LoginPage() {
         }
     };
 
-    // Demo login (خليناها للتجربة إلا بغيتي)
     const handleDemoLogin = () => {
         setFormData({
-            email: 'demo@restaurant.com',
+            email: 'customer@snackanass.com',
             password: 'password123'
         });
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex flex-col">
+        <main className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex flex-col font-sans">
             <Header />
 
-            <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div className="flex-1 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
                 <div className="relative w-full max-w-lg">
-                    {/* Decorative background elements */}
-                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-amber-200 to-orange-300 rounded-full opacity-20 blur-xl"></div>
-                    <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-red-200 to-rose-300 rounded-full opacity-20 blur-xl"></div>
+                    {/* Decorative glow elements */}
+                    <div className="absolute -top-6 -right-6 w-28 h-28 bg-gradient-to-br from-amber-300 to-orange-400 rounded-full opacity-20 blur-xl"></div>
+                    <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-red-300 to-rose-400 rounded-full opacity-20 blur-xl"></div>
 
-                    <div className="relative bg-white/90 backdrop-blur-sm p-10 rounded-3xl shadow-2xl border border-orange-100">
-                        {/* Logo Section */}
-                        <div className="flex justify-center mb-6">
-                            <div className="relative">
-                                <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <i className="fas fa-utensils text-4xl text-white" />
-                                </div>
-                                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
-                                    <i className="fas fa-arrow-right text-white text-xs" />
-                                </div>
+                    <div className="relative bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl shadow-2xl border border-orange-100">
+                        
+                        {/* Tab Switcher: Customer vs Admin Link */}
+                        <div className="flex p-1.5 bg-gray-100 rounded-2xl mb-8 border border-gray-200/80">
+                            <div className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-white text-stone-900 shadow-md flex items-center justify-center gap-2">
+                                <i className="fas fa-user text-xs"></i>
+                                <span>Customer Sign In</span>
+                            </div>
+
+                            <a
+                                href="http://127.0.0.1:8000/admin/login"
+                                className="flex-1 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 text-gray-500 hover:text-[#800000] hover:bg-white/60"
+                            >
+                                <i className="fas fa-shield-halved text-xs"></i>
+                                <span>Admin Portal →</span>
+                            </a>
+                        </div>
+
+                        {/* Logo & Header */}
+                        <div className="flex justify-center mb-5">
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#800000] to-[#b30000] rounded-2xl flex items-center justify-center shadow-lg text-amber-300 text-2xl">
+                                <i className="fas fa-utensils"></i>
                             </div>
                         </div>
 
-                        {/* Header */}
-                        <div className="text-center mb-10">
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 via-red-600 to-rose-600 bg-clip-text text-transparent">
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl font-extrabold text-stone-900">
                                 Welcome Back
                             </h1>
-                            <p className="text-gray-500 mt-3 font-medium">
-                                Sign in to continue your food journey
+                            <p className="text-gray-500 text-sm mt-2">
+                                Sign in to place food orders and manage your table reservations
                             </p>
                         </div>
 
-                        {/* Demo Button */}
-                        <button
-                            onClick={handleDemoLogin}
-                            className="w-full mb-6 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all duration-300 border border-gray-200 hover:shadow-md"
-                        >
-                            Try Demo Account
-                        </button>
+                        {/* Auth Required Notice Banner */}
+                        {authRequiredNotice && loginRole === 'customer' && (
+                            <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-400 text-stone-900 flex items-start gap-3 shadow-sm">
+                                <div className="w-8 h-8 rounded-xl bg-[#800000] text-amber-300 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5 shadow">
+                                    <i className="fas fa-lock"></i>
+                                </div>
+                                <div className="flex-1">
+                                    <div className="text-xs font-bold uppercase tracking-wider text-[#800000]">
+                                        Authentication Required
+                                    </div>
+                                    <p className="text-xs text-stone-700 mt-0.5 leading-relaxed font-medium">
+                                        {authRequiredNotice}
+                                    </p>
+                                    <div className="mt-2 text-[11px] text-stone-600">
+                                        First time here?{' '}
+                                        <Link href={`/signup${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`} className="font-bold text-[#800000] hover:underline">
+                                            Create a free account →
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-                        {/* Divider */}
-                        <div className="flex items-center mb-6">
-                            <div className="flex-grow border-t border-gray-200"></div>
-                            <span className="flex-shrink mx-4 text-gray-400 text-sm">Or sign in with email</span>
-                            <div className="flex-grow border-t border-gray-200"></div>
+                        {/* Demo Customer Account */}
+                        <div className="flex gap-2 mb-6">
+                            <button
+                                type="button"
+                                onClick={handleDemoLogin}
+                                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-3 rounded-xl transition text-xs border border-gray-200 flex items-center justify-center gap-1.5"
+                            >
+                                <i className="fas fa-wand-magic-sparkles text-amber-600"></i>
+                                <span>Fill Demo Customer</span>
+                            </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Email Input */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">
-                                    <i className="fas fa-envelope inline w-4 h-4 mr-2" />
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 ml-1">
                                     Email Address
                                 </label>
                                 <div className="relative">
@@ -159,26 +209,25 @@ export default function LoginPage() {
                                         name="email"
                                         required
                                         value={formData.email}
-                                        className={`w-full px-5 py-4 pl-12 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 border-2 ${errors.email ? 'border-red-400' : 'border-gray-200'} focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-all duration-300`}
+                                        className={`w-full px-4 py-3.5 pl-11 rounded-xl bg-gray-50 border-2 ${errors.email ? 'border-red-400' : 'border-gray-200'} focus:border-[#800000] focus:bg-white outline-none transition text-sm text-stone-900`}
                                         placeholder="you@example.com"
                                         onChange={handleChange}
                                     />
-                                    <i className="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 flex items-center justify-center" />
+                                    <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                                 </div>
                                 {errors.email && (
-                                    <p className="text-red-500 text-sm mt-2 ml-1">{errors.email}</p>
+                                    <p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>
                                 )}
                             </div>
 
                             {/* Password Input */}
                             <div>
-                                <div className="flex justify-between items-center mb-2 ml-1">
-                                    <label className="text-sm font-semibold text-gray-700">
-                                        <i className="fas fa-lock inline w-4 h-4 mr-2" />
+                                <div className="flex justify-between items-center mb-1.5 ml-1">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-700">
                                         Password
                                     </label>
-                                    <Link href="/forgot-password" className="text-sm font-medium bg-gradient-to-r from-amber-500 to-red-500 bg-clip-text text-transparent hover:opacity-80 transition">
-                                        Forgot Password?
+                                    <Link href="/forgot-password" className="text-xs font-semibold text-[#800000] hover:underline">
+                                        Forgot?
                                     </Link>
                                 </div>
                                 <div className="relative">
@@ -187,41 +236,31 @@ export default function LoginPage() {
                                         name="password"
                                         required
                                         value={formData.password}
-                                        className={`w-full px-5 py-4 pl-12 pr-12 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 border-2 ${errors.password ? 'border-red-400' : 'border-gray-200'} focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition-all duration-300`}
+                                        className={`w-full px-4 py-3.5 pl-11 pr-11 rounded-xl bg-gray-50 border-2 ${errors.password ? 'border-red-400' : 'border-gray-200'} focus:border-[#800000] focus:bg-white outline-none transition text-sm text-stone-900`}
                                         placeholder="••••••••"
                                         onChange={handleChange}
                                     />
-                                    <i className="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 flex items-center justify-center" />
+                                    <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
                                     >
-                                        {showPassword ? <i className="fas fa-eye-slash w-5 h-5" /> : <i className="fas fa-eye w-5 h-5" />}
+                                        <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                     </button>
                                 </div>
                                 {errors.password && (
-                                    <p className="text-red-500 text-sm mt-2 ml-1">{errors.password}</p>
+                                    <p className="text-red-500 text-xs mt-1 ml-1">{errors.password}</p>
                                 )}
                             </div>
 
-                            {/* Remember Me */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id="remember"
-                                        className="w-4 h-4 text-amber-600 bg-gray-100 border-gray-300 rounded focus:ring-amber-500 focus:ring-2"
-                                    />
-                                    <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
-                                        Remember me
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Error/Success Message */}
+                            {/* Feedback Message */}
                             {message && (
-                                <div className={`p-4 rounded-xl text-center font-semibold animate-pulse ${message.includes('🎉') ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 border border-emerald-200' : 'bg-gradient-to-r from-red-100 to-rose-100 text-rose-700 border border-rose-200'}`}>
+                                <div className={`p-3.5 rounded-xl text-center text-xs font-bold ${
+                                    message.includes('🎉') || message.includes('🛡️')
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        : 'bg-red-50 text-red-700 border border-red-200'
+                                }`}>
                                     {message}
                                 </div>
                             )}
@@ -230,61 +269,46 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-amber-500 via-red-500 to-rose-500 text-white font-bold py-4 rounded-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg group relative overflow-hidden"
+                                className="w-full py-4 rounded-xl text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 via-red-500 to-rose-600 hover:scale-[1.01]"
                             >
-                                <span className="relative z-10 flex items-center justify-center">
-                                    {loading ? (
-                                        <>
-                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Signing in...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Continue to Menu
-                                            <i className="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform" />
-                                        </>
-                                    )}
-                                </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-red-600 to-rose-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                {loading ? (
+                                    <span>Processing...</span>
+                                ) : (
+                                    <>
+                                        <span>Sign In & Continue</span>
+                                        <i className="fas fa-arrow-right"></i>
+                                    </>
+                                )}
                             </button>
                         </form>
 
-                        {/* Social Login */}
-                        <div className="mt-8">
-                            <div className="flex items-center mb-4">
-                                <div className="flex-grow border-t border-gray-200"></div>
-                                <span className="flex-shrink mx-4 text-gray-400 text-sm">Or continue with</span>
-                                <div className="flex-grow border-t border-gray-200"></div>
+                        {/* Bottom Admin Gateway */}
+                        <div className="mt-8 pt-6 border-t border-gray-100">
+                            <div className="bg-amber-50/70 border border-amber-200/70 rounded-2xl p-3.5 flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-[#800000] text-amber-300 flex items-center justify-center text-xs font-bold shadow-sm">
+                                        <i className="fas fa-shield-halved"></i>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-stone-900">Are you Restaurant Staff?</div>
+                                        <div className="text-[11px] text-stone-500">Access orders & reservations</div>
+                                    </div>
+                                </div>
+                                <a
+                                    href="http://127.0.0.1:8000/admin/login"
+                                    className="text-xs font-bold text-[#800000] hover:underline"
+                                >
+                                    Admin Area →
+                                </a>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <button className="flex items-center justify-center p-3 rounded-xl border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition hover:shadow-sm">
-                                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                                    </svg>
-                                    Google
-                                </button>
-                                <button className="flex items-center justify-center p-3 rounded-xl border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition hover:shadow-sm">
-                                    <svg className="w-5 h-5 mr-2 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                    </svg>
-                                    Facebook
-                                </button>
-                            </div>
-                        </div>
 
-                        {/* Sign Up Link */}
-                        <p className="text-center mt-8 text-gray-600">
-                            Don't have an account?{' '}
-                            <Link href="/signup" className="font-bold bg-gradient-to-r from-amber-500 to-red-500 bg-clip-text text-transparent hover:from-amber-600 hover:to-red-600 transition-all duration-300">
-                                Create account
-                            </Link>
-                        </p>
+                            <p className="text-center mt-5 text-gray-500 text-xs">
+                                Don't have a customer account?{' '}
+                                <Link href="/signup" className="font-bold text-[#800000] hover:underline">
+                                    Create one here
+                                </Link>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

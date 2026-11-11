@@ -31,7 +31,7 @@
             </div>
             <div>
                 <div class="stat-label">Total Revenue</div>
-                <div class="stat-value" style="color: #800000;">{{ number_format($totalRevenue, 2) }} <span style="font-size: 16px; font-weight: 600; color: #d4af37;">MAD</span></div>
+                <div class="stat-value" style="color: #800000;"><span style="font-size: 22px; font-weight: 700; color: #d4af37;">$</span>{{ number_format($totalRevenue, 2) }}</div>
             </div>
             <div class="stat-card-footer">
                 <i class="fas fa-shield-halved"></i>
@@ -126,7 +126,7 @@
                                 <div class="user-subtext">{{ $order->email ?? '-' }}</div>
                             </td>
                             <td>
-                                <strong style="color: #800000;">{{ number_format($order->total_price, 2) }} MAD</strong>
+                                <strong style="color: #800000;">${{ number_format($order->total_price, 2) }}</strong>
                             </td>
                             <td style="color: var(--text-muted); font-size: 13px;">
                                 {{ $order->created_at ? $order->created_at->diffForHumans() : '-' }}

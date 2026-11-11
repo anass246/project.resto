@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Comment; // ضروري نعيطو للموديل
+use App\Models\Comment;
 
 class CommentController extends Controller
 {
@@ -27,7 +27,7 @@ class CommentController extends Controller
         return response()->json(['message' => 'Comment saved successfully!', 'comment' => $comment], 201);
     }
     
-    // دالة باش تجيب الكومنتيرات الموافق عليها (اختياري)
+    // Get approved comments
     public function index()
     {
         $comments = Comment::where('status', 'approved')->latest()->get();

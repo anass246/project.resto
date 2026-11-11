@@ -17,7 +17,17 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
+
+    /**
+     * Check if user is an authorized admin.
+     * All administrators are isolated in the separate `admins` table.
+     */
+    public function isAdmin(): bool
+    {
+        return false;
+    }
 
     protected $hidden = [
         'password',

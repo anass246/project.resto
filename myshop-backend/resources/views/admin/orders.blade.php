@@ -81,7 +81,7 @@
                         </td>
                         <td>
                             <div style="font-size: 16px; font-weight: 800; color: #800000;">
-                                {{ number_format($order->total_price, 2) }} <span style="font-size: 12px; font-weight: 600; color: #d4af37;">MAD</span>
+                                ${{ number_format($order->total_price, 2) }}
                             </div>
                         </td>
                         <td>

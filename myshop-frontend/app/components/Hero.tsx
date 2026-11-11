@@ -1,4 +1,24 @@
+"use client";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function Hero() {
+    const router = useRouter();
+
+    const handleMenuClick = (e: React.MouseEvent) => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const user = localStorage.getItem('user');
+            if (!token || !user) {
+                e.preventDefault();
+                router.push('/login?redirect=/menu&reason=auth_required');
+            }
+        } catch {
+            e.preventDefault();
+            router.push('/login?redirect=/menu&reason=auth_required');
+        }
+    };
+
     return (
         <>
             <section
@@ -15,17 +35,18 @@ export default function Hero() {
                         heart of Casablanca
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                        <a
-                            href="/login"
-                            className="btn-primary text-lg py-4 px-8 floating-animation"
+                        <Link
+                            href="/menu"
+                            onClick={handleMenuClick}
+                            className="btn-primary text-lg py-4 px-8 floating-animation inline-flex items-center justify-center gap-2"
                         >
-                            <i className="fas fa-utensils mr-2" />
-                            LOGIN
-                        </a>
-                        <a href="/signup" className="btn-secondary text-lg py-4 px-8">
-                            <i className="fas fa-calendar-alt mr-2" />
-                            SIGNUP
-                        </a>
+                            <i className="fas fa-utensils" />
+                            <span>Explore Menu</span>
+                        </Link>
+                        <Link href="/login" className="btn-secondary text-lg py-4 px-8 inline-flex items-center justify-center gap-2">
+                            <i className="fas fa-user" />
+                            <span>Sign In / Account</span>
+                        </Link>
                     </div>
                 </div>
                 {/* Scroll indicator */}

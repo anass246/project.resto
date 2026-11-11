@@ -1,4 +1,24 @@
+"use client";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function Footer() {
+    const router = useRouter();
+
+    const handleMenuClick = (e: React.MouseEvent) => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const user = localStorage.getItem('user');
+            if (!token || !user) {
+                e.preventDefault();
+                router.push('/login?redirect=/menu&reason=auth_required');
+            }
+        } catch {
+            e.preventDefault();
+            router.push('/login?redirect=/menu&reason=auth_required');
+        }
+    };
+
     return (
         <>
             {/* Footer */}
@@ -26,12 +46,13 @@ export default function Footer() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a
+                                    <Link
                                         href="/menu"
+                                        onClick={handleMenuClick}
                                         className="text-gray-300 hover:text-white transition duration-300"
                                     >
                                         Menu
-                                    </a>
+                                    </Link>
                                 </li>
                                 <li>
                                     <a
